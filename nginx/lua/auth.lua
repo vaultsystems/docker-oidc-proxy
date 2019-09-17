@@ -33,5 +33,13 @@ if err then
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
 
+if os.getenv("REQUIRE_GROUP")~="" then
+  in_group = false
+  for g in res.user.groups:gmatch("([^;]*)") do
+    if g==os.getenv("REQUIRE_GROUP") then in_group=true end
+  end
+  if in_group==false then ngx.exit(ngx.HTTP_FORBIDDEN) end
+end
+
 ngx.log(ngx.INFO, "Authentication successful, setting Auth header...")
 ngx.req.set_header("Authorization", "Bearer "..session.data.enc_id_token)
